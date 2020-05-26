@@ -1,0 +1,64 @@
+```{r}
+library(tidyverse)
+library(caret)
+library(xgboost)
+library(glmnet)
+
+reorder <- function(x, name_order){
+  for (i in 1:length(name_order))
+    x[x==name_order[i]] <- i
+  predicat <- !(x %in% name_order)
+  l <- length(name_order)
+  x[predicat] <- (l+1):(l+length(predicat))
+  return (as.numeric(x))
+}
+
+```
+
+```{r}
+
+df <- read_csv('C:/Users/Shitai/Desktop/train.csv')
+realtest <- read_csv('C:/Users/Shitai/Desktop/test.csv')
+realtest$SalePrice <- NA
+df <- rbind(df, realtest)
+
+df <- df %>% 
+  mutate_if(is_numeric, ~replace_na(., 0)) %>% 
+  mutate_if(is.character, ~replace_na(., 'None'))
+
+factornames <- c('Street', 'Alley', 'Neighborhood', 'Condition1', 'Condition2', 'RoofStyle', 'RoofMatl', 'Exterior1st', 'Exterior2nd', 'MasVnrType', 'Foundation', 'Heating', 'Electrical', 'Functional', 'GarageType', 'PavedDrive', 'MiscFeature', 'SaleType', 'SaleCondition')
+
+df <- df %>% mutate_at(factornames, ~as.factor(.))
+testbegining <- which.max(df$SalePrice==0)
+
+whichar <- names(df %>% select_if(is.character))
+for (each in whichar){
+  order_names <- df[1:(testbegining-1),] %>% group_by_at(each) %>% 
+    summarise(mean(SalePrice)) %>% 
+    arrange_at(2) %>% select_at(1) 
+  df[each] <- reorder(df[each][[1]], order_names[[1]])
+}
+
+dv <- dummyVars(' ~ .', data = df)
+df1 <- data.frame(predict(dv, newdata = df))
+
+df1 <- df1 %>% select(!contains('None'))
+set.seed(1)
+train <- sample_n(df1, nrow(df1)*.8)
+test <- setdiff(df1, train)
+
+```
+
+```{r}
+set.seed(123)
+model1 <- train(
+  SalePrice ~., data = df1[1:(testbegining-1),], method = "glmnet",
+  trControl = trainControl("cv", number = 10),
+  tuneLength = 10
+)
+prediction <- predict(model1, df1[testbegining:nrow(df1),])
+res <- data.frame(Id = testbegining:nrow(df1), SalePrice = prediction)
+write.csv(res, file = 'C:/Users/Shitai/Desktop/res.csv', quote = F, na = '', row.names = F)
+```
+
+
