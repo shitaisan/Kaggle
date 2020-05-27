@@ -32,7 +32,6 @@ rmse(log(test.sample$SalePrice), log(prediction))
 
 
 #random Forest
-
 rf <- randomForest(SalePrice~., data = train.sample)
 prediction <- predict(rf, test.sample)
 rmse(log(test.sample$SalePrice), log(prediction))
