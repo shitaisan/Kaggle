@@ -60,5 +60,3 @@ prediction <- predict(model1, df1[testbegining:nrow(df1),])
 res <- data.frame(Id = testbegining:nrow(df1), SalePrice = prediction)
 write.csv(res, file = 'C:/Users/Shitai/Desktop/res.csv', quote = F, na = '', row.names = F)
 ```
-
-
