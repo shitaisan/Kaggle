@@ -39,5 +39,3 @@ test <- predict(model, realtest)$class
 table(test.data$Survived, test)
 
 res <- data.frame(PassengerId = 892:(891+nrow(realtest)), Survived = test)
-
-
