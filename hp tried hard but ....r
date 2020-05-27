@@ -4,8 +4,8 @@ library(xgboost)
 library(glmnet)
 rm(list = ls())
 
-df <- read_csv('C:/Users/Shitai/Desktop/train.csv')
-realtest <- read_csv('C:/Users/Shitai/Desktop/test.csv')
+df <- read_csv('train.csv')
+realtest <- read_csv('test.csv')
 realtest$SalePrice <- 0
 df <- rbind(df, realtest)
 teststart <- which.max(df$SalePrice==0)
@@ -94,7 +94,7 @@ prediction <- cbind(prediction, predict(fit3, df1[teststart:nrow(df1),]))
 
 prediction <- apply(prediction, 1, mean)
 res <- data.frame(Id = realtest$Id, SalePrice = prediction)
-write.csv(res, file = 'C:/Users/Shitai/Desktop/res.csv', 
+write.csv(res, file = 'res.csv', 
           quote = F, na = '', row.names = F)
 
 
