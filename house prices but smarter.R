@@ -61,7 +61,6 @@ realtest$RoofMatl.Metal <- 0
 realtest$RoofMatl.Roll <- 0
 realtest$MiscFeature.TenC <- 0
 #======================================================
-
 prediction <- predict(rf, realtest)
 res <- data.frame(Id = realtest$Id, SalePrice = prediction)
 write.csv(res, file = 'res.csv', quote = F, na = '', row.names = F)
