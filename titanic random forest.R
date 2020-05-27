@@ -29,4 +29,3 @@ experiment <- function(n){
 res <- sapply(seq(1, 20, 1), experiment)
 plot(res)
 which.max(res)
-     
