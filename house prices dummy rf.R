@@ -9,7 +9,6 @@ reorder <- function(x, name_order){
   x[predicat] <- (l+1):(l+length(predicat))
   return (as.numeric(x))
 }
-
 dataprep <- function(df){
   df$Alley[is.na(df$Alley)] <- 'no access'
   df$LotFrontage[is.na(df$LotFrontage)] <- median(df$LotFrontage, na.rm = T)
