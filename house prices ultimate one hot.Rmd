@@ -78,7 +78,7 @@ fit1 <- train(SalePrice~., data = df1,
               tuneGrid = xgbGrid)
 prediction <- predict(fit1, realtest1)
 res <- data.frame(Id = realtest1$Id, SalePrice = prediction)
-write.csv(res, file = 'C:/Users/Shitai/Desktop/res.csv', quote = F, na = '', row.names = F)
+write.csv(res, file = '/res.csv', quote = F, na = '', row.names = F)
 
 ```
 
@@ -107,9 +107,7 @@ fit2 <- xgb.train(data = xgb_train,
 
 prediction <- predict(fit2, as.matrix(realtest1))
 res <- data.frame(Id = realtest1$Id, SalePrice = prediction)
-write.csv(res, file = 'C:/Users/Shitai/Desktop/res.csv', quote = F, na = '', row.names = F)
-
-
+write.csv(res, file = 'res.csv', quote = F, na = '', row.names = F)
 ```
 
 ```{r glmnet}
@@ -124,8 +122,6 @@ cv <- cv.glmnet(as.matrix(df1 %>% select(!SalePrice)), df1$SalePrice, alpha)
 model1 <- glmnet(train_x, train_y, alpha=0.1, lambda = cv$lambda.min)
 prediction <- predict(model1, as.matrix(test_x))
 sqrt(mean((log(prediction)-log(test$SalePrice))^2))
-
-
 
 ```
 
@@ -175,97 +171,6 @@ sqrt(mean((log(prediction[,3])-log(test$SalePrice))^2))
 
 prediction <- 0.2*predict(model2, realtest1)+0.3*predict(model3, realtest1)+0.5*predict(model4, realtest1)
 
-
 res <- data.frame(Id = realtest1$Id, SalePrice = prediction)
-write.csv(res, file = 'C:/Users/Shitai/Desktop/res.csv', quote = F, na = '', row.names = F)
+write.csv(res, file = 'res.csv', quote = F, na = '', row.names = F)
 ```
-
-
-```{r}
-
-
-prediction <- apply(prediction, 1, mean)
-res <- data.frame(Id = realtest$Id, SalePrice = prediction)
-write.csv(res, file = 'C:/Users/Shitai/Desktop/res.csv', quote = F, na = '', row.names = F)
-```
-
-```{r mxnet}
-mxnet.params <- expand.grid(layer1= 3, layer2 = c(0,5), layer3 = 0, 
-                            activation= 'relu', learningrate=1e-02,
-                            beta1=0.9, beta2=0.9999, dropout=c(0.05,0.20))
-
-ctrl.mxnet <- trainControl(method='cv', number = 5)
-fit.mxnet <- train(SalePrice~., data = df1,  
-                   method='mxnetAdam', trControl=ctrl.mxnet, 
-                   tuneGrid=mxnet.params, num.round=20,
-                   preProc = c("center", "scale"))
-prediction <- predict(fit.mxnet, realtest1)
-res <- data.frame(Id = realtest1$Id, SalePrice = prediction)
-write.csv(res, file = 'C:/Users/Shitai/Desktop/res.csv', quote = F, na = '', row.names = F)
-```
-
-```{r}
-x <- as.matrix(df1 %>% select(!SalePrice))
-y <- df1$SalePrice
-
-cv1=cv.glmnet(x,y,alpha=1)
-cv.5=cv.glmnet(x,y, alpha=.5)
-cv0=cv.glmnet(x,y,alpha=0)
-par(mfrow=c(2,2))
-plot(cv1);plot(cv.5);plot(cv0)
-plot(log(cv1$lambda),cv1$cvm,pch=19,col="red",xlab="log(Lambda)",ylab=cv1$name)
-points(log(cv.5$lambda),cv.5$cvm,pch=19,col="grey")
-points(log(cv0$lambda),cv0$cvm,pch=19,col="blue")
-legend("topleft",legend=c("alpha= 1","alpha= .5","alpha 0"),pch=19,col=c("red","grey","blue"))
-
-
-```
-
-```{r}
-fit.lasso <- glmnet(x, y, family="gaussian", alpha=1)
-fit.ridge <- glmnet(x, y, family="gaussian", alpha=0)
-fit.elnet <- glmnet(x, y, family="gaussian", alpha=.5)
-
-
-# 10-fold Cross validation for each alpha = 0, 0.1, ... , 0.9, 1.0
-fit.lasso.cv <- cv.glmnet(x, y, type.measure="mse", alpha=1, 
-                          family="gaussian")
-fit.ridge.cv <- cv.glmnet(x, y, type.measure="mse", alpha=0,
-                          family="gaussian")
-fit.elnet.cv <- cv.glmnet(x, y, type.measure="mse", alpha=.5,
-                          family="gaussian")
-
-for (i in 0:10) {
-    assign(paste("fit", i, sep=""), cv.glmnet(x, y, type.measure="mse", 
-                                              alpha=i/10,family="gaussian"))
-}
-
-x.test <- as.matrix(test %>% select(!SalePrice))
-y.test <- test$SalePrice
-
-yhat0 <- predict(fit0, s=fit0$lambda.1se, newx=x.test)
-yhat1 <- predict(fit1, s=fit1$lambda.1se, newx=x.test)
-yhat2 <- predict(fit2, s=fit2$lambda.1se, newx=x.test)
-yhat3 <- predict(fit3, s=fit3$lambda.1se, newx=x.test)
-yhat4 <- predict(fit4, s=fit4$lambda.1se, newx=x.test)
-yhat5 <- predict(fit5, s=fit5$lambda.1se, newx=x.test)
-yhat6 <- predict(fit6, s=fit6$lambda.1se, newx=x.test)
-yhat7 <- predict(fit7, s=fit7$lambda.1se, newx=x.test)
-yhat8 <- predict(fit8, s=fit8$lambda.1se, newx=x.test)
-yhat9 <- predict(fit9, s=fit9$lambda.1se, newx=x.test)
-yhat10 <- predict(fit10, s=fit10$lambda.1se, newx=x.test)
-
-mse0 <- mean((y.test - yhat0)^2)
-mse1 <- mean((y.test - yhat1)^2)
-mse2 <- mean((y.test - yhat2)^2)
-mse3 <- mean((y.test - yhat3)^2)
-mse4 <- mean((y.test - yhat4)^2)
-mse5 <- mean((y.test - yhat5)^2)
-mse6 <- mean((y.test - yhat6)^2)
-mse7 <- mean((y.test - yhat7)^2)
-mse8 <- mean((y.test - yhat8)^2)
-mse9 <- mean((y.test - yhat9)^2)
-mse10 <- mean((y.test - yhat10)^2)
-```
-
-
