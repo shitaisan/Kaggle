@@ -38,7 +38,6 @@ test <- read.csv("test.csv")
 test <- data.frame(sapply(test, prep))
 
 pred <- predict(model, data = test, type = 'response')
-
 res <- data.frame(Id = test$Id, SalePrice = pred)
 write.csv(res, file = 'res.csv', quote = F, na = '', row.names = F)
 
